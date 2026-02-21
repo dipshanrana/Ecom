@@ -9,12 +9,13 @@ import java.util.Collection;
 import java.util.List;
 
 public interface ProductRepository extends JpaRepository<Product,Long> {
+
     List<Product> findByName(String name);
 
     List<Product> findByCategory(String category);
 
     List< Product> findByPriceBetween(BigDecimal minPrice, BigDecimal maxPrice);
 
-    @Query("select  p from Product where p.name = ?1 or p.category = ?2 or (p.price between ?3 and ?4)")
+    @Query("select  p from Product p where p.name = ?1 or p.category.name = ?2 or (p.price between ?3 and ?4)")
     List<Product> findByNameOrCategoryOrPriceBetween(String name,String category,BigDecimal minPrice,BigDecimal maxPrice);
 }

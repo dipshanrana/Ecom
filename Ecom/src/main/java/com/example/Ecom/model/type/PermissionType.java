@@ -11,6 +11,5 @@ public enum PermissionType {
     PRODUCT_MANAGE("product:manage"),
     USER_MANAGE("user:manage"),
     REPORT_VIEW("report:view");
-
     private final String permission;
 }

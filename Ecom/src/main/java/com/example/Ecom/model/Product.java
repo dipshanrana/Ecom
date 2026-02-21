@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 @Entity
 @AllArgsConstructor
@@ -19,14 +20,20 @@ public class Product {
 
 
     @Lob
-    @Column(columnDefinition = "MEDIUMBLOB")
+    @Column(columnDefinition = "LONGBLOB")
     private byte[] image;
 
     private String name;
 
     private String description;
 
-    private String category;
+    @ManyToOne
+    @JoinColumn(name = "category_id")
+    private Category category;
 
     private BigDecimal price;
+
+    @OneToMany(mappedBy = "product")
+    private List<Cart> cart;
+
 }

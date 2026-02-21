@@ -4,7 +4,9 @@ package com.example.Ecom.service;
 import com.example.Ecom.dto.ProductDto;
 import com.example.Ecom.dto.ProductInfo;
 import com.example.Ecom.dto.ProductResponseDto;
+import com.example.Ecom.model.Category;
 import com.example.Ecom.model.Product;
+import com.example.Ecom.repository.CategoryRepository;
 import com.example.Ecom.repository.ProductRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -24,6 +26,7 @@ import java.util.Set;
 public class ProductService {
     private final ProductRepository productRepository;
     private final ModelMapper modelMapper;
+    private final CategoryRepository categoryRepository;
 
     public ProductResponseDto saveProduct(ProductDto productDto, MultipartFile image) throws IOException {
         Product product = new Product();
@@ -32,7 +35,6 @@ public class ProductService {
         product.setImage(image.getBytes());
         productRepository.save(product);
         return modelMapper.map(product, ProductResponseDto.class);
-
     }
 
     public ProductInfo getProduct(Long id) {
@@ -46,11 +48,12 @@ public class ProductService {
 
     @Transactional
     public ProductResponseDto updateProduct(Long id, ProductDto productDto, MultipartFile image) throws IOException {
+        Category category = categoryRepository.findById(productDto.getCategory_id()).orElseThrow();
         Product product = productRepository.findById(id).orElseThrow();
         product.setImage(image.getBytes());
         product.setName(productDto.getName());
         product.setDescription(productDto.getDescription());
-        product.setCategory(productDto.getCategory());
+        product.setCategory(category);
         product.setPrice(productDto.getPrice());
         productRepository.save(product);
         return modelMapper.map(product, ProductResponseDto.class);
@@ -72,17 +75,16 @@ public class ProductService {
     }
 
     public List<ProductInfo> searchProduct(String name, String category, BigDecimal minPrice, BigDecimal maxPrice) {
-        minPrice = minPrice != null ?minPrice : BigDecimal.ZERO;
+        minPrice = minPrice != null ? minPrice : BigDecimal.ZERO;
         maxPrice = maxPrice != null ? maxPrice : new BigDecimal("999999999999999");
-        List<Product> products= productRepository.findByNameOrCategoryOrPriceBetween(name,category,minPrice,maxPrice);
+        List<Product> products = productRepository.findByNameOrCategoryOrPriceBetween(name, category, minPrice, maxPrice);
         return products.stream().map(product ->
-              {
-                  String image = Base64.getEncoder().encodeToString(product.getImage());
-                  ProductInfo productInfo = modelMapper.map(product,ProductInfo.class);
-                  productInfo.setImage(image);
-                  return productInfo;
-              }
-              ).toList();
+                {
+                    String image = Base64.getEncoder().encodeToString(product.getImage());
+                    ProductInfo productInfo = modelMapper.map(product, ProductInfo.class);
+                    productInfo.setImage(image);
+                    return productInfo;
+                }
+        ).toList();
     }
-
 }
